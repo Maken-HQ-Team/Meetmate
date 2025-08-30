@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>White Theme CSS Variables Test</title>
+    <link rel="stylesheet" href="white-theme.css">
+    <style>
+        body {
+            font-family: var(--white-theme-font-sans);
+            background-color: var(--white-theme-bg);
+            color: var(--white-theme-text-primary);
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .color-item {
+            padding: 16px;
+            border-radius: var(--white-theme-radius-lg);
+            border: 1px solid var(--white-theme-border);
+            text-align: center;
+        }
+        
+        .bg-primary { background-color: var(--white-theme-primary); color: var(--white-theme-text-inverse); }
+        .bg-surface { background-color: var(--white-theme-surface); }
+        .bg-hover { background-color: var(--white-theme-hover); }
+        .bg-selected { background-color: var(--white-theme-selected); }
+        
+        .shadow-test {
+            padding: 20px;
+            margin: 16px 0;
+            background: var(--white-theme-bg);
+            border-radius: var(--white-theme-radius-xl);
+        }
+        
+        .shadow-sm { box-shadow: var(--white-theme-shadow-sm); }
+        .shadow-md { box-shadow: var(--white-theme-shadow-md); }
+        .shadow-lg { box-shadow: var(--white-theme-shadow-lg); }
+        
+        .typography-test {
+            margin: 16px 0;
+        }
+        
+        .text-xs { font-size: var(--white-theme-text-xs); }
+        .text-sm { font-size: var(--white-theme-text-sm); }
+        .text-base { font-size: var(--white-theme-text-base); }
+        .text-lg { font-size: var(--white-theme-text-lg); }
+        .text-xl { font-size: var(--white-theme-text-xl); }
+        
+        .font-normal { font-weight: var(--white-theme-font-normal); }
+        .font-medium { font-weight: var(--white-theme-font-medium); }
+        .font-semibold { font-weight: var(--white-theme-font-semibold); }
+        .font-bold { font-weight: var(--white-theme-font-bold); }
+        
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin: 8px 0;
+            max-width: 300px;
+        }
+        
+        .outgoing {
+            background: var(--white-theme-outgoing);
+            color: var(--white-theme-outgoing-text);
+            margin-left: auto;
+        }
+        
+        .incoming {
+            background-color: var(--white-theme-incoming);
+            color: var(--white-theme-incoming-text);
+        }
+        
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: var(--white-theme-font-semibold);
+            margin: 8px;
+        }
+        
+        .avatar-1 { background: var(--white-theme-avatar-gradient-1); }
+        .avatar-2 { background: var(--white-theme-avatar-gradient-2); }
+        .avatar-3 { background: var(--white-theme-avatar-gradient-3); }
+        .avatar-4 { background: var(--white-theme-avatar-gradient-4); }
+        
+        .animation-test {
+            padding: 20px;
+            background: var(--white-theme-surface);
+            border-radius: var(--white-theme-radius-lg);
+            margin: 16px 0;
+            cursor: pointer;
+            transition: var(--white-theme-transition-normal);
+        }
+        
+        .animation-test:hover {
+            background: var(--white-theme-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--white-theme-shadow-md);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="font-bold text-xl">White Theme CSS Variables Test</h1>
+        
+        <h2 class="font-semibold text-lg">Color Palette</h2>
+        <div class="color-palette">
+            <div class="color-item bg-primary">Primary</div>
+            <div class="color-item bg-surface">Surface</div>
+            <div class="color-item bg-hover">Hover</div>
+            <div class="color-item bg-selected">Selected</div>
+        </div>
+        
+        <h2 class="font-semibold text-lg">Shadow System</h2>
+        <div class="shadow-test shadow-sm">Small Shadow</div>
+        <div class="shadow-test shadow-md">Medium Shadow</div>
+        <div class="shadow-test shadow-lg">Large Shadow</div>
+        
+        <h2 class="font-semibold text-lg">Typography</h2>
+        <div class="typography-test text-xs font-normal">Extra Small Text (12px)</div>
+        <div class="typography-test text-sm font-normal">Small Text (14px)</div>
+        <div class="typography-test text-base font-medium">Base Text (16px)</div>
+        <div class="typography-test text-lg font-semibold">Large Text (18px)</div>
+        <div class="typography-test text-xl font-bold">Extra Large Text (20px)</div>
+        
+        <h2 class="font-semibold text-lg">Message Bubbles</h2>
+        <div class="message-bubble incoming">This is an incoming message with light gray background</div>
+        <div class="message-bubble outgoing">This is an outgoing message with gradient background</div>
+        
+        <h2 class="font-semibold text-lg">Avatar Gradients</h2>
+        <div class="avatar avatar-1">JD</div>
+        <div class="avatar avatar-2">AS</div>
+        <div class="avatar avatar-3">MK</div>
+        <div class="avatar avatar-4">LR</div>
+        
+        <h2 class="font-semibold text-lg">Animation Test</h2>
+        <div class="animation-test">Hover over this element to see smooth transitions</div>
+        
+        <h2 class="font-semibold text-lg">Text Colors</h2>
+        <p class="white-theme-text-primary">Primary text color</p>
+        <p class="white-theme-text-secondary">Secondary text color</p>
+        <p class="white-theme-text-muted">Muted text color</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,634 @@
+/* White Theme CSS System and Variables */
+/* Modern, clean white theme for inbox chat system */
+
+:root {
+  /* ===== PRIMARY COLOR PALETTE ===== */
+  /* Main backgrounds */
+  --white-theme-bg: #ffffff;              /* Main white background */
+  --white-theme-surface: #f8fafc;         /* Surface/panel background */
+  --white-theme-surface-elevated: #ffffff; /* Elevated surfaces (modals, cards) */
+  --white-theme-border: #e2e8f0;          /* Subtle borders */
+  --white-theme-border-light: #f1f5f9;    /* Very light borders */
+  --white-theme-hover: #f1f5f9;           /* Hover states */
+  --white-theme-active: #e2e8f0;          /* Active/pressed states */
+  --white-theme-selected: #dbeafe;        /* Selected items */
+
+  /* ===== TEXT COLOR HIERARCHY ===== */
+  --white-theme-text-primary: #1e293b;    /* Primary text (dark) */
+  --white-theme-text-secondary: #64748b;  /* Secondary text (gray) */
+  --white-theme-text-muted: #94a3b8;      /* Muted text (light gray) */
+  --white-theme-text-disabled: #cbd5e1;   /* Disabled text */
+  --white-theme-text-inverse: #ffffff;    /* White text for dark backgrounds */
+
+  /* ===== ACCENT COLORS ===== */
+  --white-theme-primary: #3b82f6;         /* Primary blue */
+  --white-theme-primary-light: #dbeafe;   /* Light blue background */
+  --white-theme-primary-dark: #1d4ed8;    /* Dark blue for hover states */
+  --white-theme-secondary: #8b5cf6;       /* Purple accent */
+  --white-theme-secondary-light: #ede9fe; /* Light purple background */
+  --white-theme-success: #10b981;         /* Success green */
+  --white-theme-success-light: #d1fae5;   /* Light green background */
+  --white-theme-warning: #f59e0b;         /* Warning amber */
+  --white-theme-warning-light: #fef3c7;   /* Light amber background */
+  --white-theme-error: #ef4444;           /* Error red */
+  --white-theme-error-light: #fee2e2;     /* Light red background */
+
+  /* ===== MESSAGE BUBBLE COLORS ===== */
+  --white-theme-outgoing: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);  /* Blue to purple gradient */
+  --white-theme-incoming: #f1f5f9;        /* Light gray for incoming */
+  --white-theme-outgoing-text: #ffffff;   /* White text on gradient */
+  --white-theme-incoming-text: #1e293b;   /* Dark text on light */
+  --white-theme-bubble-shadow: 0 1px 2px rgb(0 0 0 / 0.1); /* Subtle bubble shadow */
+
+  /* ===== SHADOW SYSTEM ===== */
+  /* Elevation levels for depth and hierarchy */
+  --white-theme-shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --white-theme-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --white-theme-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --white-theme-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --white-theme-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+  --white-theme-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  
+  /* Colored shadows for interactive elements */
+  --white-theme-shadow-primary: 0 0 0 3px rgb(59 130 246 / 0.1);
+  --white-theme-shadow-error: 0 0 0 3px rgb(239 68 68 / 0.1);
+  --white-theme-shadow-success: 0 0 0 3px rgb(16 185 129 / 0.1);
+
+  /* ===== TYPOGRAPHY SYSTEM ===== */
+  /* Font families */
+  --white-theme-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --white-theme-font-mono: 'JetBrains Mono', 'Fira Code', 'Monaco', 'Consolas', monospace;
+
+  /* Font sizes - fluid typography scale */
+  --white-theme-text-xs: 0.75rem;     /* 12px */
+  --white-theme-text-sm: 0.875rem;    /* 14px */
+  --white-theme-text-base: 1rem;      /* 16px */
+  --white-theme-text-lg: 1.125rem;    /* 18px */
+  --white-theme-text-xl: 1.25rem;     /* 20px */
+  --white-theme-text-2xl: 1.5rem;     /* 24px */
+  --white-theme-text-3xl: 1.875rem;   /* 30px */
+
+  /* Font weights */
+  --white-theme-font-light: 300;
+  --white-theme-font-normal: 400;
+  --white-theme-font-medium: 500;
+  --white-theme-font-semibold: 600;
+  --white-theme-font-bold: 700;
+  --white-theme-font-extrabold: 800;
+
+  /* Line heights for optimal readability */
+  --white-theme-leading-tight: 1.25;
+  --white-theme-leading-normal: 1.5;
+  --white-theme-leading-relaxed: 1.625;
+  --white-theme-leading-loose: 2;
+
+  /* ===== SPACING SYSTEM ===== */
+  /* Consistent spacing scale */
+  --white-theme-space-1: 0.25rem;   /* 4px */
+  --white-theme-space-2: 0.5rem;    /* 8px */
+  --white-theme-space-3: 0.75rem;   /* 12px */
+  --white-theme-space-4: 1rem;      /* 16px */
+  --white-theme-space-5: 1.25rem;   /* 20px */
+  --white-theme-space-6: 1.5rem;    /* 24px */
+  --white-theme-space-8: 2rem;      /* 32px */
+  --white-theme-space-10: 2.5rem;   /* 40px */
+  --white-theme-space-12: 3rem;     /* 48px */
+  --white-theme-space-16: 4rem;     /* 64px */
+
+  /* ===== BORDER RADIUS SYSTEM ===== */
+  --white-theme-radius-none: 0;
+  --white-theme-radius-sm: 0.125rem;    /* 2px */
+  --white-theme-radius-md: 0.375rem;    /* 6px */
+  --white-theme-radius-lg: 0.5rem;      /* 8px */
+  --white-theme-radius-xl: 0.75rem;     /* 12px */
+  --white-theme-radius-2xl: 1rem;       /* 16px */
+  --white-theme-radius-3xl: 1.5rem;     /* 24px */
+  --white-theme-radius-full: 9999px;    /* Fully rounded */
+
+  /* ===== ANIMATION AND TRANSITION SYSTEM ===== */
+  /* Duration values for consistent timing */
+  --white-theme-duration-75: 75ms;
+  --white-theme-duration-100: 100ms;
+  --white-theme-duration-150: 150ms;
+  --white-theme-duration-200: 200ms;
+  --white-theme-duration-300: 300ms;
+  --white-theme-duration-500: 500ms;
+  --white-theme-duration-700: 700ms;
+  --white-theme-duration-1000: 1000ms;
+
+  /* Easing functions for natural motion */
+  --white-theme-ease-linear: linear;
+  --white-theme-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --white-theme-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --white-theme-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --white-theme-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --white-theme-ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Common transition combinations */
+  --white-theme-transition-fast: all var(--white-theme-duration-150) var(--white-theme-ease-out);
+  --white-theme-transition-normal: all var(--white-theme-duration-200) var(--white-theme-ease-out);
+  --white-theme-transition-slow: all var(--white-theme-duration-300) var(--white-theme-ease-out);
+  --white-theme-transition-colors: color var(--white-theme-duration-150) var(--white-theme-ease-out), 
+                                   background-color var(--white-theme-duration-150) var(--white-theme-ease-out),
+                                   border-color var(--white-theme-duration-150) var(--white-theme-ease-out);
+  --white-theme-transition-transform: transform var(--white-theme-duration-200) var(--white-theme-ease-out);
+  --white-theme-transition-opacity: opacity var(--white-theme-duration-200) var(--white-theme-ease-out);
+
+  /* ===== COMPONENT-SPECIFIC VARIABLES ===== */
+  /* Avatar gradient variations */
+  --white-theme-avatar-gradient-1: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  --white-theme-avatar-gradient-2: linear-gradient(135deg, #10b981, #3b82f6);
+  --white-theme-avatar-gradient-3: linear-gradient(135deg, #f59e0b, #ef4444);
+  --white-theme-avatar-gradient-4: linear-gradient(135deg, #8b5cf6, #ec4899);
+  --white-theme-avatar-gradient-5: linear-gradient(135deg, #06b6d4, #3b82f6);
+  --white-theme-avatar-gradient-6: linear-gradient(135deg, #84cc16, #10b981);
+  --white-theme-avatar-gradient-7: linear-gradient(135deg, #f97316, #f59e0b);
+  --white-theme-avatar-gradient-8: linear-gradient(135deg, #ec4899, #be185d);
+
+  /* Input and form elements */
+  --white-theme-input-bg: var(--white-theme-bg);
+  --white-theme-input-border: var(--white-theme-border);
+  --white-theme-input-border-focus: var(--white-theme-primary);
+  --white-theme-input-text: var(--white-theme-text-primary);
+  --white-theme-input-placeholder: var(--white-theme-text-muted);
+  --white-theme-input-shadow-focus: var(--white-theme-shadow-primary);
+
+  /* Button variations */
+  --white-theme-button-primary-bg: var(--white-theme-primary);
+  --white-theme-button-primary-text: var(--white-theme-text-inverse);
+  --white-theme-button-primary-hover: var(--white-theme-primary-dark);
+  --white-theme-button-secondary-bg: var(--white-theme-surface);
+  --white-theme-button-secondary-text: var(--white-theme-text-primary);
+  --white-theme-button-secondary-hover: var(--white-theme-hover);
+
+  /* Modal and overlay */
+  --white-theme-overlay-bg: rgba(0, 0, 0, 0.5);
+  --white-theme-modal-bg: var(--white-theme-surface-elevated);
+  --white-theme-modal-shadow: var(--white-theme-shadow-2xl);
+  --white-theme-backdrop-blur: blur(8px);
+
+  /* Status indicators */
+  --white-theme-online: #10b981;
+  --white-theme-away: #f59e0b;
+  --white-theme-busy: #ef4444;
+  --white-theme-offline: #94a3b8;
+
+  /* Message status colors */
+  --white-theme-message-sent: var(--white-theme-text-muted);
+  --white-theme-message-delivered: var(--white-theme-success);
+  --white-theme-message-read: var(--white-theme-primary);
+
+  /* ===== Z-INDEX SYSTEM ===== */
+  --white-theme-z-dropdown: 1000;
+  --white-theme-z-sticky: 1020;
+  --white-theme-z-fixed: 1030;
+  --white-theme-z-modal-backdrop: 1040;
+  --white-theme-z-modal: 1050;
+  --white-theme-z-popover: 1060;
+  --white-theme-z-tooltip: 1070;
+  --white-theme-z-toast: 1080;
+}
+
+/* ===== UTILITY CLASSES ===== */
+/* Common utility classes for consistent styling */
+
+/* Text utilities */
+.white-theme-text-primary { color: var(--white-theme-text-primary); }
+.white-theme-text-secondary { color: var(--white-theme-text-secondary); }
+.white-theme-text-muted { color: var(--white-theme-text-muted); }
+.white-theme-text-inverse { color: var(--white-theme-text-inverse); }
+
+/* Background utilities */
+.white-theme-bg { background-color: var(--white-theme-bg); }
+.white-theme-surface { background-color: var(--white-theme-surface); }
+.white-theme-hover { background-color: var(--white-theme-hover); }
+
+/* Border utilities */
+.white-theme-border { border-color: var(--white-theme-border); }
+.white-theme-border-light { border-color: var(--white-theme-border-light); }
+
+/* Shadow utilities */
+.white-theme-shadow-sm { box-shadow: var(--white-theme-shadow-sm); }
+.white-theme-shadow-md { box-shadow: var(--white-theme-shadow-md); }
+.white-theme-shadow-lg { box-shadow: var(--white-theme-shadow-lg); }
+
+/* Transition utilities */
+.white-theme-transition { transition: var(--white-theme-transition-normal); }
+.white-theme-transition-fast { transition: var(--white-theme-transition-fast); }
+.white-theme-transition-colors { transition: var(--white-theme-transition-colors); }
+
+/* ===== ANIMATION KEYFRAMES ===== */
+/* Reusable animations for micro-interactions */
+
+@keyframes white-theme-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes white-theme-slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes white-theme-slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes white-theme-slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes white-theme-slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes white-theme-scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes white-theme-bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -8px, 0);
+  }
+  70% {
+    transform: translate3d(0, -4px, 0);
+  }
+  90% {
+    transform: translate3d(0, -2px, 0);
+  }
+}
+
+@keyframes white-theme-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes white-theme-shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes white-theme-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Typing indicator animation */
+@keyframes white-theme-typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ===== ANIMATION UTILITY CLASSES ===== */
+.white-theme-animate-fadeIn {
+  animation: white-theme-fadeIn var(--white-theme-duration-200) var(--white-theme-ease-out);
+}
+
+.white-theme-animate-slideUp {
+  animation: white-theme-slideUp var(--white-theme-duration-300) var(--white-theme-ease-out);
+}
+
+.white-theme-animate-slideDown {
+  animation: white-theme-slideDown var(--white-theme-duration-300) var(--white-theme-ease-out);
+}
+
+.white-theme-animate-scaleIn {
+  animation: white-theme-scaleIn var(--white-theme-duration-200) var(--white-theme-ease-out);
+}
+
+.white-theme-animate-bounce {
+  animation: white-theme-bounce var(--white-theme-duration-1000) var(--white-theme-ease-out);
+}
+
+.white-theme-animate-pulse {
+  animation: white-theme-pulse var(--white-theme-duration-1000) var(--white-theme-ease-in-out) infinite;
+}
+
+.white-theme-animate-spin {
+  animation: white-theme-spin var(--white-theme-duration-1000) linear infinite;
+}
+
+/* ===== RESPONSIVE DESIGN HELPERS ===== */
+/* Breakpoint-specific adjustments */
+
+@media (max-width: 768px) {
+  :root {
+    /* Adjust spacing for mobile */
+    --white-theme-space-4: 0.875rem;  /* 14px instead of 16px */
+    --white-theme-space-6: 1.25rem;   /* 20px instead of 24px */
+    
+    /* Adjust font sizes for mobile */
+    --white-theme-text-base: 0.875rem; /* 14px instead of 16px */
+    --white-theme-text-lg: 1rem;       /* 16px instead of 18px */
+  }
+}
+
+/* ===== ACCESSIBILITY FEATURES ===== */
+/* Support for reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --white-theme-duration-75: 0ms;
+    --white-theme-duration-100: 0ms;
+    --white-theme-duration-150: 0ms;
+    --white-theme-duration-200: 0ms;
+    --white-theme-duration-300: 0ms;
+    --white-theme-duration-500: 0ms;
+    --white-theme-duration-700: 0ms;
+    --white-theme-duration-1000: 0ms;
+  }
+  
+  .white-theme-animate-fadeIn,
+  .white-theme-animate-slideUp,
+  .white-theme-animate-slideDown,
+  .white-theme-animate-scaleIn,
+  .white-theme-animate-bounce {
+    animation: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --white-theme-border: #000000;
+    --white-theme-text-secondary: #000000;
+    --white-theme-text-muted: #333333;
+  }
+}
+
+/* Dark mode preference detection (for future use) */
+@media (prefers-color-scheme: dark) {
+  /* Variables can be overridden here if needed for system dark mode */
+}
+
+/* ===== FOCUS MANAGEMENT ===== */
+/* Consistent focus styles for accessibility */
+.white-theme-focus-ring {
+  outline: 2px solid var(--white-theme-primary);
+  outline-offset: 2px;
+}
+
+.white-theme-focus-ring-inset {
+  outline: 2px solid var(--white-theme-primary);
+  outline-offset: -2px;
+}
+
+/* Remove default focus styles when using custom focus rings */
+.white-theme-focus-ring:focus,
+.white-theme-focus-ring-inset:focus {
+  outline: 2px solid var(--white-theme-primary);
+}
+
+/* ===== PRINT STYLES ===== */
+/* Optimize for printing */
+@media print {
+  :root {
+    --white-theme-bg: #ffffff;
+    --white-theme-surface: #ffffff;
+    --white-theme-text-primary: #000000;
+    --white-theme-text-secondary: #333333;
+    --white-theme-border: #cccccc;
+  }
+  
+  .white-theme-shadow-sm,
+  .white-theme-shadow-md,
+  .white-theme-shadow-lg {
+    box-shadow: none;
+  }
+}
+/* =
+==== CONVERSATION LIST COMPONENT STYLES ===== */
+/* Modern white theme styling for conversation list */
+
+.white-theme-conversation-item {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--white-theme-border);
+  transition: all var(--white-theme-duration-200) var(--white-theme-ease-out);
+}
+
+.white-theme-conversation-item:hover {
+  background-color: var(--white-theme-hover);
+}
+
+.white-theme-conversation-item:active {
+  transform: translateY(0);
+  background-color: var(--white-theme-active);
+}
+
+.white-theme-conversation-selected {
+  background-color: var(--white-theme-selected) !important;
+  border-left: 3px solid var(--white-theme-primary);
+}
+
+.white-theme-conversation-selected:hover {
+  background-color: var(--white-theme-selected) !important;
+}
+
+/* Avatar styling - no animations */
+.white-theme-conversation-item .white-theme-avatar {
+  /* No transitions or animations for avatars */
+}
+
+/* Unread badge styling - no animations */
+.white-theme-conversation-item .white-theme-unread-badge {
+  /* No animations for unread badges */
+}
+
+/* Typography enhancements */
+.white-theme-conversation-item h3 {
+  transition: color var(--white-theme-duration-150) var(--white-theme-ease-out);
+}
+
+.white-theme-conversation-item p {
+  transition: color var(--white-theme-duration-150) var(--white-theme-ease-out);
+}
+
+/* Focus states for accessibility */
+.white-theme-conversation-item:focus {
+  outline: 2px solid var(--white-theme-primary);
+  outline-offset: -2px;
+  background-color: var(--white-theme-primary-light);
+}
+
+.white-theme-conversation-item:focus h3 {
+  color: var(--white-theme-primary-dark);
+}
+
+/* Loading state shimmer effect */
+@keyframes white-theme-conversation-shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.white-theme-conversation-loading {
+  background: linear-gradient(90deg, var(--white-theme-surface) 25%, var(--white-theme-hover) 50%, var(--white-theme-surface) 75%);
+  background-size: 200px 100%;
+  animation: white-theme-conversation-shimmer 1.5s infinite;
+}
+
+/* Empty state styling */
+.white-theme-conversation-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--white-theme-space-8);
+  text-align: center;
+  animation: white-theme-fadeIn var(--white-theme-duration-300) var(--white-theme-ease-out);
+}
+
+.white-theme-conversation-empty-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: var(--white-theme-space-6);
+  background: linear-gradient(135deg, var(--white-theme-primary-light), var(--white-theme-secondary-light));
+  border-radius: var(--white-theme-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: white-theme-bounce var(--white-theme-duration-1000) var(--white-theme-ease-out);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .white-theme-conversation-item {
+    padding: var(--white-theme-space-3);
+  }
+  
+  .white-theme-conversation-item .white-theme-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: var(--white-theme-text-base);
+  }
+  
+  .white-theme-conversation-item h3 {
+    font-size: var(--white-theme-text-sm);
+  }
+  
+  .white-theme-conversation-item p {
+    font-size: var(--white-theme-text-xs);
+  }
+}
+
+/* High contrast mode adjustments */
+@media (prefers-contrast: high) {
+  .white-theme-conversation-item {
+    border-bottom: 2px solid var(--white-theme-border);
+  }
+  
+  .white-theme-conversation-selected {
+    border-left: 4px solid var(--white-theme-primary);
+    background-color: var(--white-theme-primary-light);
+  }
+  
+  .white-theme-conversation-item:focus {
+    outline: 3px solid var(--white-theme-primary);
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .white-theme-conversation-item,
+  .white-theme-conversation-item .white-theme-avatar,
+  .white-theme-conversation-item .white-theme-unread-badge {
+    transition: none;
+    animation: none;
+  }
+  
+  .white-theme-conversation-item:hover {
+    transform: none;
+  }
+  
+  .white-theme-conversation-item:hover .white-theme-avatar {
+    transform: none;
+  }
+}/*
+ ===== SCROLLBAR STYLING ===== */
+/* Custom scrollbar for white theme */
+
+.white-theme-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.white-theme-scrollbar::-webkit-scrollbar-track {
+  background: var(--white-theme-surface);
+}
+
+.white-theme-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--white-theme-border);
+  border-radius: var(--white-theme-radius-full);
+}
+
+.white-theme-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--white-theme-text-muted);
+}
+
+/* Firefox scrollbar styling */
+.white-theme-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--white-theme-border) var(--white-theme-surface);
+}
+
+/* Ensure proper scrolling containers */
+.white-theme-scrollbar {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
