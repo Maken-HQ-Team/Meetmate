@@ -37,7 +37,7 @@ export const useNotifications = () => {
 
     try {
       const { data, error } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
@@ -45,38 +45,31 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      const notificationsData = data || [];
-      
-      // Get unique from_user_ids to fetch profiles
-      const fromUserIds = [...new Set(notificationsData
+      const notificationsData = (data || []) as any[];
+      // Only keep notifications with expected properties
+      const filteredNotifications = notificationsData.filter(n => n.type && n.title && n.message);
+      const fromUserIds = [...new Set(filteredNotifications
         .map(n => n.from_user_id)
         .filter(Boolean))] as string[];
-      
+
       let profilesData: any[] = [];
       if (fromUserIds.length > 0) {
         const { data: profiles, error: profilesError } = await supabase
           .from('profiles')
           .select('user_id, name, avatar_url, country')
           .in('user_id', fromUserIds);
-        
         if (!profilesError) {
           profilesData = profiles || [];
         }
       }
-      
-      // Create profiles map
       const profilesMap = profilesData.reduce((acc, profile) => {
         acc[profile.user_id] = profile;
         return acc;
       }, {} as Record<string, any>);
-      
-      // Merge notifications with profile data
-      const enrichedNotifications = notificationsData.map(notification => ({
+      const enrichedNotifications = filteredNotifications.map(notification => ({
         ...notification,
         from_profile: notification.from_user_id ? profilesMap[notification.from_user_id] : null
       }));
-      
-      console.log('Processed notifications:', enrichedNotifications);
       setNotifications(enrichedNotifications);
       setUnreadCount(enrichedNotifications.filter(n => !n.read_at).length);
     } catch (error) {
@@ -89,7 +82,7 @@ export const useNotifications = () => {
   const markAsRead = async (notificationId: string) => {
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .update({ read_at: new Date().toISOString() })
         .eq('id', notificationId)
         .eq('user_id', user?.id);
@@ -118,7 +111,7 @@ export const useNotifications = () => {
         .from('notifications' as any)
         .update({ read_at: new Date().toISOString() })
         .eq('user_id', user.id)
-        .eq('read_at', null);
+        .is('read_at', null);
 
       if (error) throw error;
 
@@ -135,7 +128,7 @@ export const useNotifications = () => {
   const deleteNotification = async (notificationId: string) => {
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .delete()
         .eq('id', notificationId)
         .eq('user_id', user?.id);
@@ -160,7 +153,7 @@ export const useNotifications = () => {
     try {
       // Get current user's profile for name
       const { data: profile } = await supabase
-        .from('profiles')
+        .from('profiles' as any)
         .select('name')
         .eq('user_id', user.id)
         .single();
@@ -169,7 +162,7 @@ export const useNotifications = () => {
 
       // Activate the share (set is_active = true)
       const { error: shareError } = await supabase
-        .from('shares')
+        .from('shares' as any)
         .update({ is_active: true })
         .eq('owner_id', notification.from_user_id)
         .eq('viewer_id', user.id);
@@ -181,7 +174,7 @@ export const useNotifications = () => {
 
       // Create acceptance notification for the sender
       const { error: notificationError } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .insert({
           user_id: notification.from_user_id,
           type: 'share_accepted',
@@ -214,7 +207,7 @@ export const useNotifications = () => {
     try {
       // Get current user's profile for name
       const { data: profile } = await supabase
-        .from('profiles')
+        .from('profiles' as any)
         .select('name')
         .eq('user_id', user.id)
         .single();
@@ -223,7 +216,7 @@ export const useNotifications = () => {
 
       // Delete the pending share (reject it)
       const { error: shareError } = await supabase
-        .from('shares')
+        .from('shares' as any)
         .delete()
         .eq('owner_id', notification.from_user_id)
         .eq('viewer_id', user.id)
@@ -236,7 +229,7 @@ export const useNotifications = () => {
 
       // Create rejection notification for the sender
       const { error: notificationError } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .insert({
           user_id: notification.from_user_id,
           type: 'share_rejected',
