@@ -103,13 +103,20 @@ const ShareModal = ({ isOpen, onClose }: ShareModalProps) => {
       // Create notification
       const ownerName = ownerProfile?.name || user.user_metadata?.name || user.email || 'Someone';
       const ownerCountry = ownerProfile?.country || 'US';
-      
-      await createShareNotification(
+      const notificationSuccess = await createShareNotification(
         userIdData,
         ownerName,
         ownerCountry,
         user.id
       );
+      if (!notificationSuccess) {
+        toast({
+          title: "Notification Error",
+          description: "Failed to send notification. Please check your connection or try again.",
+          variant: "destructive",
+        });
+      }
+      // Optionally, force refresh notifications for the recipient (if you control their client)
 
       setShareLink(`${window.location.origin}/shared/${user.id}`);
       toast({

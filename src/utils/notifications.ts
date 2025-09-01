@@ -9,17 +9,19 @@ export const createNotification = async (
   fromUserId?: string,
   metadata?: any
 ) => {
+  const payload = {
+    user_id: userId,
+    type,
+    title,
+    message,
+    from_user_id: fromUserId,
+    metadata: metadata || {},
+  };
+  console.log('createNotification payload:', payload);
   try {
     const { error } = await supabase
       .from('notifications')
-      .insert({
-        user_id: userId,
-        type,
-        title,
-        message,
-        from_user_id: fromUserId,
-        metadata: metadata || {},
-      });
+      .insert(payload);
 
     if (error) {
       console.error('Error creating notification:', error);
@@ -28,7 +30,7 @@ export const createNotification = async (
 
     return true;
   } catch (error) {
-    console.error('Error creating notification:', error);
+    console.error('Error creating notification (catch):', error);
     return false;
   }
 };

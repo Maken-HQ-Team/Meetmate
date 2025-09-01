@@ -115,10 +115,10 @@ export const useNotifications = () => {
 
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from('notifications' as any)
         .update({ read_at: new Date().toISOString() })
         .eq('user_id', user.id)
-        .is('read_at', null);
+        .eq('read_at', null);
 
       if (error) throw error;
 
