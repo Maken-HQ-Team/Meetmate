@@ -32,8 +32,8 @@ import {
   Trash2,
   Clock,
 } from 'lucide-react';
-import { formatInTimeZone } from 'date-fns-tz';
-import { getTimezoneById } from '@/data/timezones';
+import { fromZonedTime, toZonedTime, formatInTimeZone } from 'date-fns-tz';
+import { format } from 'date-fns';
 
 interface HorizontalCalendarProps {
   availabilitySlots: AvailabilitySlot[];
@@ -184,145 +184,43 @@ const HorizontalCalendar = ({
     referenceDate.setDate(today.getDate() + diff);
     return referenceDate;
   };
-
-  // Parse UTC offset string (e.g., "+05:30", "-08:00") to minutes
-  const parseUtcOffset = (offsetString: string): number => {
-    const match = offsetString.match(/^([+-])(\d{2}):(\d{2})$/);
-    if (!match) return 0;
-
-    const [, sign, hours, minutes] = match;
-    const totalMinutes = parseInt(hours) * 60 + parseInt(minutes);
-    return sign === '+' ? totalMinutes : -totalMinutes;
-  };
-
-  // Convert time slot using UTC offsets from timezone data
+  // Convert time slot using date-aware timezone conversion
   const convertTimeSlot = (slot: AvailabilitySlot, targetTimezone: string) => {
-    if (!slot.timezone || slot.timezone === targetTimezone) return slot;
 
     try {
-      // Get timezone data for both source and target
-      const sourceTimezoneData = getTimezoneById(slot.timezone);
-      const targetTimezoneData = getTimezoneById(targetTimezone);
+      const referenceDate = getCurrentWeekReferenceDate(slot.dayOfWeek);
+      const dateString = format(referenceDate, 'yyyy-MM-dd');
 
-      if (!sourceTimezoneData || !targetTimezoneData) {
-        console.warn(`Timezone data not found: ${slot.timezone} -> ${targetTimezone}`);
-        return {
-          ...slot,
-          isConverted: false,
-          conversionError: 'Timezone data not found'
-        };
-      }
+      // Normalize possible HH:mm:ss from DB to HH:mm before composing ISO strings
+      const normalizeTime = (t: string) => {
+        const parts = (t || '').split(':');
+        const hh = (parts[0] ?? '00').padStart(2, '0');
+        const mm = (parts[1] ?? '00').padStart(2, '0');
+        return `${hh}:${mm}`;
+      };
 
-      // Parse UTC offsets
-      const sourceOffsetMinutes = parseUtcOffset(sourceTimezoneData.offset);
-      const targetOffsetMinutes = parseUtcOffset(targetTimezoneData.offset);
+      const startHHmm = normalizeTime(slot.startTime);
+      const endHHmm = normalizeTime(slot.endTime);
 
-      // Calculate the difference in minutes
-      const offsetDifferenceMinutes = targetOffsetMinutes - sourceOffsetMinutes;
+      // Build full local datetimes in source timezone
+      const startLocal = `${dateString}T${startHHmm}:00`;
+      const endLocal = `${dateString}T${endHHmm}:00`;
 
-      console.log(`Converting timezone offsets:`, {
-        source: `${slot.timezone} (${sourceTimezoneData.offset})`,
-        target: `${targetTimezone} (${targetTimezoneData.offset})`,
-        sourceOffset: sourceOffsetMinutes,
-        targetOffset: targetOffsetMinutes,
-        difference: offsetDifferenceMinutes
-      });
+      // Convert source local -> UTC
+      const startUtc = fromZonedTime(startLocal, slot.timezone);
+      const endUtc = fromZonedTime(endLocal, slot.timezone);
 
-      // Parse start and end times
-      const [startHour, startMin] = slot.startTime.split(':').map(Number);
-      const [endHour, endMin] = slot.endTime.split(':').map(Number);
+      // Convert UTC -> target timezone
+      const startTarget = toZonedTime(startUtc, targetTimezone);
+      const endTarget = toZonedTime(endUtc, targetTimezone);
 
-      // Convert start time
-      let convertedStartMinutes = startHour * 60 + startMin + offsetDifferenceMinutes;
-      // For end time, ensure we're treating it as the end of the interval
-      // If end time is 11:00, it means the slot ends at 11:00 (not starts at 11:00)
-      let convertedEndMinutes = endHour * 60 + endMin + offsetDifferenceMinutes;
+      // Format back to HH:mm in the TARGET timezone regardless of system timezone
+      const convertedStartTime = formatInTimeZone(startUtc, targetTimezone, 'HH:mm');
+      const convertedEndTime = formatInTimeZone(endUtc, targetTimezone, 'HH:mm');
 
-      // Handle day boundary crossings
-      let dayOffset = 0;
-      let crossesMidnight = false;
-
-      // Check if start time crosses day boundary
-      if (convertedStartMinutes < 0) {
-        dayOffset = -1;
-        convertedStartMinutes += 24 * 60; // Add 24 hours
-        convertedEndMinutes += 24 * 60;
-      } else if (convertedStartMinutes >= 24 * 60) {
-        dayOffset = 1;
-        convertedStartMinutes -= 24 * 60; // Subtract 24 hours
-        convertedEndMinutes -= 24 * 60;
-      }
-
-      // Check if the slot now crosses midnight after conversion
-      if (convertedEndMinutes >= 24 * 60) {
-        crossesMidnight = true;
-        // For now, we'll cap the end time at 23:59 to avoid complex slot splitting
-        // In a future enhancement, we could split this into multiple slots
-        convertedEndMinutes = 23 * 60 + 59; // 23:59
-        console.log('⚠️ Slot crosses midnight after conversion, capping end time at 23:59');
-      } else if (convertedEndMinutes < 0) {
-        // End time went to previous day, adjust
-        convertedEndMinutes += 24 * 60;
-        crossesMidnight = true;
-      }
-
-      // Ensure times are within valid bounds (0-1439 minutes for 00:00-23:59)
-      convertedStartMinutes = Math.max(0, Math.min(convertedStartMinutes, 23 * 60 + 59));
-      convertedEndMinutes = Math.max(0, Math.min(convertedEndMinutes, 23 * 60 + 59));
-      
-      // Critical fix: Ensure end time is always after start time
-      // This prevents the off-by-one error where the last hour gets dropped
-      if (convertedEndMinutes <= convertedStartMinutes) {
-        // If end time is same as or before start time, extend it by at least 1 hour
-        convertedEndMinutes = Math.min(convertedStartMinutes + 60, 23 * 60 + 59);
-        console.log(`⚠️ End time adjusted to ensure proper interval: ${convertedEndMinutes} minutes`);
-      }
-
-      // Convert back to HH:MM format
-      const convertedStartHour = Math.floor(convertedStartMinutes / 60);
-      const convertedStartMin = convertedStartMinutes % 60;
-      // For end time, we need to ensure we capture the full interval
-      // If endMinutes has any fractional part, round up to the next hour
-      let convertedEndHour = Math.ceil(convertedEndMinutes / 60);
-      let convertedEndMin = convertedEndMinutes % 60;
-      
-      // Ensure end time is at least start time + 1 hour to maintain minimum slot duration
-      if (convertedEndHour <= convertedStartHour) {
-        convertedEndHour = convertedStartHour + 1;
-        convertedEndMin = 0;
-      }
-
-      const convertedStartTime = `${convertedStartHour.toString().padStart(2, '0')}:${convertedStartMin.toString().padStart(2, '0')}`;
-      const convertedEndTime = `${convertedEndHour.toString().padStart(2, '0')}:${convertedEndMin.toString().padStart(2, '0')}`;
-      
-      // Final validation: Ensure the converted interval makes sense
-      const originalDuration = (endHour * 60 + endMin) - (startHour * 60 + startMin);
-      const convertedDuration = convertedEndMinutes - convertedStartMinutes;
-      
-      if (Math.abs(convertedDuration - originalDuration) > 60) {
-        console.warn(`⚠️ Duration mismatch detected: Original ${originalDuration}min vs Converted ${convertedDuration}min`);
-      }
-
-      // Calculate new day of week (handle wrap-around)
-      let newDayOfWeek = slot.dayOfWeek + dayOffset;
-      if (newDayOfWeek < 0) newDayOfWeek += 7;
-      if (newDayOfWeek > 6) newDayOfWeek -= 7;
-
-      console.log(`Converting slot from ${slot.timezone} to ${targetTimezone}:`, {
-        original: `${slot.startTime}-${slot.endTime} (Day ${slot.dayOfWeek})`,
-        converted: `${convertedStartTime}-${convertedEndTime} (Day ${newDayOfWeek})`,
-        offsetDifference: `${offsetDifferenceMinutes} minutes`,
-        dayOffset,
-        // Add detailed conversion info for debugging
-        conversionDetails: {
-          startMinutes: convertedStartMinutes,
-          endMinutes: convertedEndMinutes,
-          startHour: convertedStartHour,
-          endHour: convertedEndHour,
-          startMin: convertedStartMin,
-          endMin: convertedEndMin
-        }
-      });
+      // Compute day in target timezone
+      const targetDayString = formatInTimeZone(startUtc, targetTimezone, 'i'); // ISO day 1-7 (Mon-Sun)
+      const newDayOfWeek = ((parseInt(targetDayString, 10) % 7)); // convert Mon=1..Sun=7 to Sun=0..Sat=6
 
       return {
         ...slot,
@@ -330,24 +228,14 @@ const HorizontalCalendar = ({
         endTime: convertedEndTime,
         dayOfWeek: newDayOfWeek,
         isConverted: true,
-        crossesMidnight,
         originalTime: {
           startTime: slot.startTime,
           endTime: slot.endTime,
           timezone: slot.timezone,
           dayOfWeek: slot.dayOfWeek
-        },
-        conversionInfo: {
-          originalTime: `${slot.startTime}-${slot.endTime}`,
-          convertedTime: `${convertedStartTime}-${convertedEndTime}`,
-          fromTimezone: slot.timezone,
-          toTimezone: targetTimezone,
-          offsetDifference: offsetDifferenceMinutes,
-          dayOffset,
-          crossesMidnight
         }
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error converting timezone:', error);
       return {
         ...slot,
@@ -384,18 +272,21 @@ const HorizontalCalendar = ({
 
     if (showInUserTimezone) {
       // Convert to user's timezone
-      const slotUserTimezone = getUserTimezone(slot.userId);
       const targetTimezone = userTimezone && isValidTimezone(userTimezone) ? userTimezone : 'UTC';
 
-      if (slotUserTimezone !== targetTimezone) {
-        // Create a slot with the user's timezone for conversion
-        const slotWithUserTimezone = {
+      // Prefer the slot's own timezone if valid; otherwise fall back to owner's profile timezone
+      const sourceTimezone = slot.timezone && isValidTimezone(slot.timezone)
+        ? slot.timezone
+        : getUserTimezone(slot.userId);
+
+      if (sourceTimezone !== targetTimezone) {
+        const slotForConversion = {
           ...slot,
-          timezone: slotUserTimezone
+          timezone: sourceTimezone
         };
 
-        displaySlot = convertTimeSlot(slotWithUserTimezone, targetTimezone);
-        console.log(`Converting slot from ${slotUserTimezone} to ${targetTimezone}:`, {
+        displaySlot = convertTimeSlot(slotForConversion, targetTimezone);
+        console.log(`Converting slot from ${sourceTimezone} to ${targetTimezone}:`, {
           userId: slot.userId,
           original: `${slot.startTime}-${slot.endTime} (Day ${slot.dayOfWeek})`,
           converted: `${displaySlot.startTime}-${displaySlot.endTime} (Day ${displaySlot.dayOfWeek})`

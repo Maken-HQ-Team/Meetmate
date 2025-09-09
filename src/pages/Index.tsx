@@ -1,5 +1,5 @@
-import { Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAvailability } from '@/hooks/useAvailability';
 import { useSharedAvailability } from '@/hooks/useSharedAvailability';
@@ -14,29 +14,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Share2, Calendar, Loader2, MessageCircle } from 'lucide-react';
 
 const Index = () => {
-  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { availabilitySlots, loading, createSlot, updateSlot, deleteSlot } = useAvailability();
   const { sharedSlots, profilesData, loading: sharedLoading } = useSharedAvailability();
   const { loading: notesLoading } = useUserNotes(); // Initialize user notes
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   const userTimezone = user?.user_metadata?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-  // Removed unread count logic
-
-  // Show loading spinner while checking auth
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  // Redirect to auth if not logged in
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
 
   return (
     <AppLayout>
@@ -54,10 +39,7 @@ const Index = () => {
           <div className="flex items-center space-x-3">
             <Button 
               variant="outline" 
-              onClick={async () => {
-                // Navigate to conversations
-                window.location.href = '/conversations';
-              }} 
+              onClick={() => navigate('/conversations')} 
               className="relative"
             >
               <MessageCircle className="h-4 w-4 mr-2" />

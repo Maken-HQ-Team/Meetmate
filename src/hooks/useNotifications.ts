@@ -256,12 +256,14 @@ export const useNotifications = () => {
     }
   };
 
-  // Set up real-time subscription
+  // Set up real-time subscription with polling + visibility fallback
   useEffect(() => {
     if (!user) return;
 
+    // Initial fetch
     fetchNotifications();
 
+    // Realtime updates (INSERT/UPDATE/DELETE)
     const channel = supabase
       .channel('notifications-changes')
       .on(
@@ -278,8 +280,23 @@ export const useNotifications = () => {
       )
       .subscribe();
 
+    // Polling fallback (in case realtime is disabled or blocked by network)
+    const pollInterval = setInterval(() => {
+      fetchNotifications();
+    }, 15000); // every 15s
+
+    // Refetch when tab gains focus
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchNotifications();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollInterval);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [user]);
 
