@@ -12,6 +12,7 @@ import ShareManager from '@/components/sharing/ShareManager';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Share2, Calendar, Loader2, MessageCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -20,8 +21,69 @@ const Index = () => {
   const { sharedSlots, profilesData, loading: sharedLoading } = useSharedAvailability();
   const { loading: notesLoading } = useUserNotes(); // Initialize user notes
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [hasRealtimeNew, setHasRealtimeNew] = useState(false);
 
   const userTimezone = user?.user_metadata?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const { contacts, refreshContacts } = useContacts();
+
+  // Ensure unread badge is accurate when returning to dashboard or after read updates
+  useEffect(() => {
+    // Initial refresh
+    console.log('[Index] Initial refreshContacts');
+    refreshContacts();
+
+    const handleForceRefresh = () => {
+      console.log('[Index] force-refresh-contacts event received');
+      refreshContacts();
+    };
+    const handleFocus = () => {
+      console.log('[Index] window focus, refreshing contacts');
+      refreshContacts();
+    };
+
+    window.addEventListener('force-refresh-contacts', handleForceRefresh);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('force-refresh-contacts', handleForceRefresh);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, [refreshContacts]);
+
+  // Realtime: show dot on dashboard when a new inbound message arrives
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('index-messages-realtime')
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id.eq.${user.id}` },
+        (payload) => {
+          console.log('[Index] realtime INSERT for receiver', payload.new?.id);
+          // Only show dot when not on conversations page
+          if (window.location.pathname !== '/conversations') {
+            setHasRealtimeNew(true);
+          }
+          // Also refresh contacts to keep counts consistent
+          refreshContacts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, refreshContacts]);
+  const totalUnread = (contacts || []).reduce((sum, c) => sum + (c.unread_count || 0), 0);
+
+  // Debug whenever inputs to the badge change
+  useEffect(() => {
+    const suppressed = !!sessionStorage.getItem('suppressConvoDot');
+    console.log('[Index] badge eval:', {
+      totalUnread,
+      path: window.location.pathname,
+      suppressed
+    });
+  }, [totalUnread, contacts]);
 
   return (
     <AppLayout>
@@ -39,11 +101,23 @@ const Index = () => {
           <div className="flex items-center space-x-3">
             <Button 
               variant="outline" 
-              onClick={() => navigate('/conversations')} 
+              onClick={() => { 
+                console.log('[Index] Conversations clicked: setting suppressConvoDot and navigating');
+                sessionStorage.setItem('suppressConvoDot', '1'); 
+                setHasRealtimeNew(false);
+                navigate('/conversations'); 
+              }} 
               className="relative"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Conversations
+              {/* Only show red dot when not on Conversations route and not suppressed */}
+              {(totalUnread > 0 || hasRealtimeNew) && window.location.pathname !== '/conversations' && !sessionStorage.getItem('suppressConvoDot') && (
+                <span className="absolute -top-1 -right-1 inline-flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+              )}
             </Button>
             <Button onClick={() => setShareModalOpen(true)}>
               <Share2 className="h-4 w-4 mr-2" />

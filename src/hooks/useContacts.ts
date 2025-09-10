@@ -35,15 +35,14 @@ export const useContacts = () => {
           try {
         setLoading(true);
 
-      // Get contacts based on shared availability relationships
+      // Get contacts based on shared availability relationships (both directions, any status)
       const { data: shares, error: sharesError } = await supabase
         .from('shares')
         .select('*')
-        .or(`owner_id.eq.${user.id},viewer_id.eq.${user.id}`)
-        .eq('is_active', true);
+        .or(`owner_id.eq.${user.id},viewer_id.eq.${user.id}`);
 
-      console.log('Shares data:', shares); // Debug log
-      console.log('Shares error:', sharesError); // Debug log
+      console.log('[useContacts] Shares data:', shares); // Debug log
+      console.log('[useContacts] Shares error:', sharesError); // Debug log
 
       if (sharesError) throw sharesError;
 
@@ -51,35 +50,59 @@ export const useContacts = () => {
       const contactIds = new Set<string>();
       shares?.forEach(share => {
         if (share.owner_id === user.id) {
-          contactIds.add(share.viewer_id);
+          if (share.viewer_id !== user.id) contactIds.add(share.viewer_id);
         } else {
-          contactIds.add(share.owner_id);
+          if (share.owner_id !== user.id) contactIds.add(share.owner_id);
         }
       });
 
-      console.log('Contact IDs extracted:', Array.from(contactIds));
+      // Also include anyone we've exchanged messages with (both directions)
+      try {
+        const { data: partnerMessages, error: partnerErr } = await supabase
+          .from('messages')
+          .select('sender_id, receiver_id')
+          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+          .limit(1000);
 
-      // If no shares exist, return empty contacts list
+        if (!partnerErr && partnerMessages) {
+          partnerMessages.forEach((m: any) => {
+            if (m.sender_id && m.sender_id !== user.id) contactIds.add(m.sender_id);
+            if (m.receiver_id && m.receiver_id !== user.id) contactIds.add(m.receiver_id);
+          });
+        }
+      } catch (e) {
+        console.log('[useContacts] Error collecting message partners:', e);
+      }
+
+      console.log('[useContacts] Contact IDs extracted:', Array.from(contactIds));
+
+      // If still no contacts, return empty contacts list
       if (contactIds.size === 0) {
-        console.log('No shares found');
+        console.log('[useContacts] No contacts found via shares or messages');
         setContacts([]);
         return;
       }
 
-      // Get contact profiles
+      // Prepare arrays and get contact profiles
+      const allContactIds = Array.from(contactIds);
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
-        .in('user_id', Array.from(contactIds));
+        .in('user_id', allContactIds);
 
-      console.log('Contact IDs:', Array.from(contactIds)); // Debug log
-      console.log('Profiles data:', profiles); // Debug log
-      console.log('Profiles error:', profilesError); // Debug log
+      console.log('[useContacts] Contact IDs:', allContactIds); // Debug log
+      console.log('[useContacts] Profiles data:', profiles); // Debug log
+      console.log('[useContacts] Profiles error:', profilesError); // Debug log
 
       if (profilesError) throw profilesError;
 
-      // Get last messages
-      let lastMessages = {};
+      // Index profiles by user_id for easy lookup
+      const profileMap = new Map<string, any>();
+      (profiles || []).forEach((p: any) => profileMap.set(p.user_id, p));
+
+      // Get last messages and unread counts
+      let lastMessages = {} as Record<string, any>;
+      let unreadCounts = {} as Record<string, number>;
       try {
         const { data: messageData, error: messageError } = await supabase
           .from('messages')
@@ -87,43 +110,55 @@ export const useContacts = () => {
           .order('created_at', { ascending: false });
           
         if (!messageError && messageData) {
-          profiles.forEach(profile => {
+          allContactIds.forEach(contactId => {
             const lastMessage = messageData.find(msg => 
-              (msg.sender_id === profile.user_id && msg.receiver_id === user.id) ||
-              (msg.sender_id === user.id && msg.receiver_id === profile.user_id)
+              (msg.sender_id === contactId && msg.receiver_id === user.id) ||
+              (msg.sender_id === user.id && msg.receiver_id === contactId)
             );
-            lastMessages[profile.user_id] = lastMessage;
+            lastMessages[contactId] = lastMessage;
+
+            // Count unread messages from this contact to current user
+            // Client-side "last seen" override: if last inbound message is before lastSeen, treat as read
+            const lastSeen = sessionStorage.getItem(`lastSeen_${contactId}`);
+            const unreadForContact = messageData.filter(msg => {
+              const isInbound = msg.sender_id === contactId && msg.receiver_id === user.id;
+              if (!isInbound) return false;
+              if (lastSeen && new Date(msg.created_at) <= new Date(lastSeen)) return false;
+              return msg.read_at === null || msg.read_at === undefined;
+            }).length;
+            unreadCounts[contactId] = unreadForContact;
           });
+          console.log('[useContacts] Computed unreadCounts:', unreadCounts);
         }
       } catch (error) {
-        console.log('Error getting messages:', error);
+        console.log('[useContacts] Error getting messages:', error);
       }
 
-              // Process contacts
-        const contactsWithMessages = profiles.map(profile => {
-          // Get last message for this contact
-          const lastMessage = lastMessages[profile.user_id];
+      // Process contacts from allContactIds to ensure inclusion even without profile rows
+      const contactsWithMessages = allContactIds.map(contactId => {
+        const prof = profileMap.get(contactId);
+        const lastMessage = lastMessages[contactId];
 
-          // Simplified status flags
-          const isBlocked = false; // TODO: Implement user blocking
-          const isOnline = false; // TODO: Implement real-time presence
-          const lastSeen = new Date().toISOString(); // TODO: Implement last seen tracking
+        // Simplified status flags
+        const isBlocked = false; // TODO: Implement user blocking
+        const isOnline = false; // TODO: Implement real-time presence
+        const lastSeen = new Date().toISOString(); // TODO: Implement last seen tracking
 
-          return {
-            id: profile.user_id,
-            name: profile.name,
-            email: profile.email,
-            avatar_url: profile.avatar_url,
-            bio: profile.bio,
-            country: profile.country,
-            timezone: profile.timezone,
-            last_message: lastMessage || undefined,
-            unread_count: 0, // Always set to 0 since we removed unread count logic
-            is_online: isOnline,
-            last_seen: lastSeen,
-            is_blocked: isBlocked
-          };
-        });
+        return {
+          id: contactId,
+          name: prof?.name || 'Pending share',
+          email: prof?.email || '',
+          avatar_url: prof?.avatar_url,
+          bio: prof?.bio,
+          country: prof?.country,
+          timezone: prof?.timezone,
+          last_message: lastMessage || undefined,
+          unread_count: unreadCounts[contactId] || 0,
+          is_online: isOnline,
+          last_seen: lastSeen,
+          is_blocked: isBlocked
+        };
+      });
 
       // Sort contacts by last message time or name
       const sortedContacts = contactsWithMessages.sort((a, b) => {
@@ -135,6 +170,7 @@ export const useContacts = () => {
         return a.name.localeCompare(b.name);
       });
 
+      console.log('[useContacts] Final contacts set (ids, unread):', sortedContacts.map(c => ({ id: c.id, unread: c.unread_count })));
       setContacts(sortedContacts);
     } catch (error: any) {
       console.error('Error fetching contacts:', error);
@@ -171,8 +207,22 @@ export const useContacts = () => {
             filter: `receiver_id.eq.${user.id}`,
           },
           (payload) => {
-            console.log('New message received:', payload);
+            console.log('[useContacts] INSERT message received:', { id: payload.new?.id, read_at: payload.new?.read_at });
             // Refresh contacts to show new messages
+            fetchContacts();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'messages',
+            filter: `receiver_id.eq.${user.id}`,
+          },
+          (payload) => {
+            console.log('[useContacts] UPDATE message received:', { id: payload.new?.id, read_at: payload.new?.read_at });
+            // Refresh contacts to update unread counts immediately
             fetchContacts();
           }
         )
@@ -209,12 +259,11 @@ export const useContacts = () => {
       const { error: updateError } = await supabase
         .from('messages')
         .update({ 
-          is_read: true, 
           read_at: new Date().toISOString() 
         })
         .eq('receiver_id', user.id)
         .eq('sender_id', contactId)
-        .is('is_read', false) as { error: any };
+        .is('read_at', null) as { error: any };
           
       if (updateError) {
         console.error('Update failed:', updateError);

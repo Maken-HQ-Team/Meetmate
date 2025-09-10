@@ -60,7 +60,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   onBack
 }) => {
   const { user } = useAuth();
-  const { messages, sendMessage, loading } = useMessages(contactId, 'contact');
+  const { messages, sendMessage, loading, markInboundAsRead } = useMessages(contactId, 'contact');
   const { toggleReaction, loading: reactionLoading } = useReactions();
   const [message, setMessage] = useState('');
   const [replyTo, setReplyTo] = useState<Message | null>(null);
@@ -74,6 +74,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const getInitials = (name: string) => {
     return name.charAt(0).toUpperCase();
   };
+  // Removed unread divider logic
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
@@ -127,7 +128,31 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     scrollToBottom();
   }, []);
 
-  // Removed mark messages as read logic since we removed unread count system
+  // Mark inbound messages as read when viewing this chat
+  useEffect(() => {
+    console.log('[ChatInterface] markInboundAsRead on messages/contact change', { contactId, messagesCount: messages.length });
+    markInboundAsRead();
+    window.dispatchEvent(new Event('force-refresh-contacts'));
+  }, [messages, contactId]);
+
+  // Record last seen time for this contact (client-side override for unread calc)
+  useEffect(() => {
+    if (!contactId) return;
+    const now = new Date().toISOString();
+    sessionStorage.setItem(`lastSeen_${contactId}`, now);
+    console.log('[ChatInterface] set lastSeen for contact', { contactId, now });
+    window.dispatchEvent(new Event('force-refresh-contacts'));
+  }, [contactId]);
+
+  // Also refresh contacts when navigating away from this page
+  useEffect(() => {
+    console.log('[ChatInterface] cleanup: dispatch force-refresh-contacts on unmount');
+    return () => {
+      window.dispatchEvent(new Event('force-refresh-contacts'));
+    };
+  }, []);
+
+  
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -186,8 +211,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   key={msg.id}
                   className={`flex ${isOwnMessage(msg) ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div className={`max-w-[70%] ${isOwnMessage(msg) ? 'order-2' : 'order-1'}`}>
-                    {!isOwnMessage(msg) && isFirstInGroup && (
+                  {/* Removed new messages divider */}
+                  {/* Left avatar for other user's messages */}
+                  {!isOwnMessage(msg) && isFirstInGroup && (
+                    <div className="mr-2">
                       <Avatar className="h-8 w-8 mb-1">
                         {contactAvatar ? (
                           <AvatarImage src={contactAvatar} alt={contactName} />
@@ -197,10 +224,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                           </AvatarFallback>
                         )}
                       </Avatar>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
-                  <div className={`max-w-[70%] ${isOwnMessage(msg) ? 'order-1' : 'order-2'}`}>
+                  <div className={`max-w-[70%] ${isOwnMessage(msg) ? 'ml-auto' : ''}`}>
                     {/* Reply to message */}
                     {msg.reply_to && (
                       <div className={`mb-1 p-2 rounded-lg bg-muted/50 border-l-4 border-primary/50 ${
@@ -221,13 +248,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     <div
                       className={`relative group p-3 ${
                         isOwnMessage(msg)
-                          ? 'bg-primary text-primary-foreground ml-auto'
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-muted'
-                      } ${
-                        isFirstInGroup ? 'rounded-2xl' : 
-                        isLastInGroup ? 'rounded-2xl' : 
-                        isOwnMessage(msg) ? 'rounded-2xl rounded-l-2xl' : 'rounded-2xl rounded-r-2xl'
-                      }`}
+                      } rounded-2xl`}
                     >
                       <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                       
@@ -377,7 +400,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     </div>
                   );
                 })}
-              </div>
+            </div>
         )}
         </div>
 

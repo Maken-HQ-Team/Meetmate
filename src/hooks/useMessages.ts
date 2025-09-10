@@ -85,22 +85,6 @@ export const useMessages = (
         })) || [];
 
       setMessages(transformedMessages);
-
-        // Mark messages as read
-        const unreadMessages = transformedMessages.filter(
-          msg => msg.sender_id === chatId && !msg.read_at
-        );
-
-        if (unreadMessages.length > 0) {
-          const { error: updateError } = await supabase
-            .from('messages')
-            .update({ read_at: new Date().toISOString() })
-            .in('id', unreadMessages.map(msg => msg.id));
-
-          if (updateError) {
-            console.error('Error marking messages as read:', updateError);
-          }
-        }
       } else if (chatType === 'group') {
         // TODO: Implement group messages when group_messages table is created
         console.log('Group messages not yet implemented');
@@ -202,79 +186,46 @@ export const useMessages = (
     if (chatType === 'contact') {
     const channel = supabase
         .channel(`messages-${chatId}-${user.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages',
-            filter: `or(and(sender_id.eq.${chatId},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${chatId}))`,
-        },
+      .on('postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          const m = payload.new;
+          if (!m) return;
+          // Only process messages relevant to this chat
+          const isForThisChat =
+            (m.sender_id === chatId && m.receiver_id === user.id) ||
+            (m.sender_id === user.id && m.receiver_id === chatId);
+          if (!isForThisChat) return;
+          console.log('[useMessages] realtime INSERT for this chat:', m.id);
+          const newMessage: Message = {
+            id: m.id,
+            content: m.content,
+            sender_id: m.sender_id,
+            receiver_id: m.receiver_id,
+            created_at: m.created_at,
+            reply_to: undefined,
+            reactions: {},
+            read_at: m.read_at,
+            is_read: !!m.read_at,
+            status: m.read_at ? 'read' : 'delivered',
+            delivered_at: m.created_at
+          };
+          setMessages(prev => [...prev, newMessage]);
+        }
+      )
+        .on('postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'messages' },
           (payload) => {
-          console.log('New message received:', payload);
-            // Add new message directly to state instead of refetching
-            if (payload.new) {
-            const newMessage: Message = {
-                id: payload.new.id,
-                content: payload.new.content,
-                sender_id: payload.new.sender_id,
-                receiver_id: payload.new.receiver_id,
-                created_at: payload.new.created_at,
-                reply_to: undefined,
-                reactions: {},
-                read_at: payload.new.read_at,
-                is_read: !!payload.new.read_at,
-                status: payload.new.read_at ? 'read' : 'delivered',
-                delivered_at: payload.new.created_at
-              };
-              setMessages(prev => [...prev, newMessage]);
-              
-              // If this is a message sent TO us, mark it as delivered and then read
-              if (payload.new.sender_id === chatId && payload.new.receiver_id === user.id) {
-                // Mark as delivered first
-                setTimeout(() => {
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === payload.new.id ? { ...msg, status: 'delivered' } : msg
-                  ));
-                }, 1000);
-                
-                // Mark as read after a short delay
-                setTimeout(async () => {
-                  const { error } = await supabase
-                    .from('messages')
-                    .update({ read_at: new Date().toISOString() })
-                    .eq('id', payload.new.id);
-                  
-                  if (!error) {
-                    setMessages(prev => prev.map(msg => 
-                      msg.id === payload.new.id ? { ...msg, status: 'read' } : msg
-                    ));
-                  }
-                }, 2000);
-              }
-            }
-          }
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'messages',
-            filter: `or(and(sender_id.eq.${chatId},receiver_id.eq.${user.id}),and(sender_id.eq.${user.id},receiver_id.eq.${chatId}))`,
-          },
-          (payload) => {
-            console.log('Message updated:', payload);
-            // Update specific message in state
-            if (payload.new) {
-              setMessages(prev => prev.map(msg => 
-                msg.id === payload.new.id ? { 
-                  ...msg, 
-                  ...payload.new,
-                  status: payload.new.read_at ? 'read' : 'delivered'
-                } : msg
-              ));
-            }
+            const m = payload.new;
+            if (!m) return;
+            const isForThisChat =
+              (m.sender_id === chatId && m.receiver_id === user.id) ||
+              (m.sender_id === user.id && m.receiver_id === chatId);
+            if (!isForThisChat) return;
+            console.log('[useMessages] realtime UPDATE for this chat:', m.id);
+            setMessages(prev => prev.map(msg =>
+              msg.id === m.id ? { ...msg, read_at: m.read_at, status: m.read_at ? 'read' : 'delivered' } : msg
+            ));
           }
         )
         .subscribe((status) => {
@@ -288,10 +239,35 @@ export const useMessages = (
     }
   }, [chatId, chatType, user, fetchMessages]);
 
+  const markInboundAsRead = useCallback(async () => {
+    if (!chatId || !user) return;
+    try {
+      const inboundUnread = messages.filter(m => m.sender_id === chatId && !m.read_at);
+      if (inboundUnread.length === 0) return;
+
+      const { error } = await supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .in('id', inboundUnread.map(m => m.id));
+
+      if (!error) {
+        const now = new Date().toISOString();
+        setMessages(prev => prev.map(m =>
+          inboundUnread.some(u => u.id === m.id)
+            ? { ...m, read_at: now, status: 'read' }
+            : m
+        ));
+      }
+    } catch (e) {
+      console.error('Failed to mark inbound as read', e);
+    }
+  }, [chatId, user, messages]);
+
   return {
     messages,
     sendMessage,
     loading,
-    refreshMessages
+    refreshMessages,
+    markInboundAsRead
   };
 };

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Search, Users } from 'lucide-react';
 
 interface Contact {
@@ -81,6 +80,7 @@ export const ContactList: React.FC<ContactListProps> = ({
                 onClick={() => onContactSelect(contact)}
               >
                 <div className="flex items-center space-x-3">
+                  <div className="relative">
                   <Avatar className="h-10 w-10">
                     {contact.avatar_url ? (
                       <AvatarImage src={contact.avatar_url} alt={contact.name} />
@@ -90,17 +90,20 @@ export const ContactList: React.FC<ContactListProps> = ({
                       </AvatarFallback>
                     )}
                   </Avatar>
+                  {contact.unread_count && contact.unread_count > 0 && (
+                    <span className="absolute -top-1 -right-1 inline-flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                  )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium truncate">{contact.name}</h4>
                     <p className="text-sm text-muted-foreground truncate">
                       {contact.last_message?.content || 'No messages yet'}
                     </p>
                   </div>
-                  {contact.unread_count > 0 && (
-                    <Badge className="ml-2" variant="destructive">
-                      {contact.unread_count}
-                    </Badge>
-                  )}
+                  {/* Removed numeric unread badge per request */}
                 </div>
               </div>
             ))}
