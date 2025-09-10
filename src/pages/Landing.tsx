@@ -26,55 +26,64 @@ const useScrollReveal = () => {
   return containerRef;
 };
 
-// --- Typewriter Quotes ---
+// --- Typewriter Quotes --- //
 const Typewriter: React.FC = () => {
   const [qIndex, setQIndex] = useState(() => Math.floor(Math.random() * QUOTES.length));
   const [qChars, setQChars] = useState(0);
   const [aChars, setAChars] = useState(0);
-  const [done, setDone] = useState(false);
-  const [fade, setFade] = useState(false);
+  const [phase, setPhase] = useState<"typing" | "waiting" | "fading">("typing");
 
   const quote = useMemo(() => QUOTES[qIndex], [qIndex]);
 
-  // Reset on quote change
+  // Reset when switching to a new quote
   useEffect(() => {
     setQChars(0);
     setAChars(0);
-    setDone(false);
-    setFade(false);
+    setPhase("typing");
   }, [qIndex]);
 
   // Typing effect
   useEffect(() => {
-    if (done) return;
-    const timer = setInterval(() => {
+    if (phase !== "typing") return;
+    const interval = setInterval(() => {
       setQChars(prev => (prev < quote.q.length ? prev + 1 : prev));
       setAChars(prev => (prev < quote.a.length ? prev + 1 : prev));
-    }, 24);
-    return () => clearInterval(timer);
-  }, [quote, done]);
+    }, 40);
 
-  // After typing finishes
+    return () => clearInterval(interval);
+  }, [phase, quote]);
+
+  // When typing finishes → wait → fade → switch
   useEffect(() => {
-    if (!done && qChars >= quote.q.length && aChars >= quote.a.length) {
-      setDone(true);
-      const pause = setTimeout(() => {
-        setFade(true); // trigger fade out
-        setTimeout(() => {
-          let next = Math.floor(Math.random() * QUOTES.length);
-          if (next === qIndex && QUOTES.length > 1) next = (next + 1) % QUOTES.length;
-          setQIndex(next);
-        }, 600); // wait for fade-out before switching
-      }, 3000); // pause before fade
-      return () => clearTimeout(pause);
+    if (phase === "typing" && qChars >= quote.q.length && aChars >= quote.a.length) {
+      setPhase("waiting");
+      const timer = setTimeout(() => setPhase("fading"), 2500); // wait before fade
+      return () => clearTimeout(timer);
     }
-  }, [qChars, aChars, done, quote, qIndex]);
+
+    if (phase === "fading") {
+      const timer = setTimeout(() => {
+        let next = Math.floor(Math.random() * QUOTES.length);
+        if (next === qIndex && QUOTES.length > 1) {
+          next = (next + 1) % QUOTES.length;
+        }
+        setQIndex(next);
+      }, 700); // fade duration
+      return () => clearTimeout(timer);
+    }
+  }, [phase, qChars, aChars, qIndex, quote]);
 
   return (
-    <div className={`relative mx-auto max-w-3xl transition-opacity duration-700 ${fade ? "opacity-0" : "opacity-100"}`}>
+    <div
+      className={`relative mx-auto max-w-3xl transition-opacity duration-700 ${
+        phase === "fading" ? "opacity-0" : "opacity-100"
+      }`}
+    >
       <p className="text-2xl md:text-3xl font-semibold leading-relaxed">
         <span className="whitespace-pre-wrap">{quote.q.slice(0, qChars)}</span>
-        <span className="inline-block w-[10px] h-6 md:h-7 align-bottom bg-foreground/80 ml-0.5 animate-pulse rounded-sm" />
+        {phase === "typing" && (
+          <span className="inline-block w-[10px] h-6 md:h-7 align-bottom bg-foreground/80 ml-0.5 animate-pulse rounded-sm" />
+        )}
       </p>
       <p className="mt-3 text-lg md:text-xl text-muted-foreground">
         — <span className="whitespace-pre-wrap">{quote.a.slice(0, aChars)}</span>
@@ -82,6 +91,7 @@ const Typewriter: React.FC = () => {
     </div>
   );
 };
+
 
 
   
@@ -171,7 +181,7 @@ const Landing = () => {
                   </p>
                   <ul className="text-muted-foreground space-y-2 list-disc pl-5">
                     <li>One-click connection</li>
-                    <li>Crystal-clear voice & video</li>
+                    <li>Best for remote teams across the world</li>
                     <li>Optimized for any network speed</li>
                   </ul>
                 </div>
@@ -236,13 +246,13 @@ const Landing = () => {
               <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Terms of Service
               </Link>
-              <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://x.com/Zahid__Maken" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="https://github.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://github.com/Maken-HQ-Team/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Github className="h-5 w-5" />
               </a>
-              <a href="https://linkedin.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+              <a href="https://www.linkedin.com/in/zahid-maken-5b4538372/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                 <Linkedin className="h-5 w-5" />
               </a>
             </div>
