@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,9 +15,7 @@ import NotificationsDropdown from '@/components/notifications/NotificationsDropd
 import { 
   Calendar, 
   LogOut, 
-  Settings, 
-  Menu,
-  X
+  Settings 
 } from 'lucide-react';
 
 interface AppLayoutProps {
@@ -28,7 +26,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
 
   const getInitials = (name: string) => {
     return name
@@ -106,19 +104,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
+            {/* Mobile Menu Button removed */}
           </div>
         </div>
 
