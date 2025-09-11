@@ -52,11 +52,7 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/terms" element={<Terms />} />
-              <Route path="/updates" element={
-                <ProtectedRoute requireAuth={false}>
-                  <Updates />
-                </ProtectedRoute>
-              } />
+              <Route path="/updates" element={<Updates />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
