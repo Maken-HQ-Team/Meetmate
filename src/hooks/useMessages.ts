@@ -210,7 +210,11 @@ export const useMessages = (
             status: m.read_at ? 'read' : 'delivered',
             delivered_at: m.created_at
           };
-          setMessages(prev => [...prev, newMessage]);
+          // Deduplicate: if message with same id already exists (e.g., after optimistic update), skip
+          setMessages(prev => (prev.some(existing => existing.id === newMessage.id)
+            ? prev
+            : [...prev, newMessage]
+          ));
         }
       )
         .on('postgres_changes',

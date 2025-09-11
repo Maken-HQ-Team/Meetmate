@@ -227,7 +227,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     </div>
                   )}
 
-                  <div className={`max-w-[70%] ${isOwnMessage(msg) ? 'ml-auto' : ''}`}>
+                  <div className={`max-w-[75%] ${isOwnMessage(msg) ? 'ml-auto' : ''}`}>
                     {/* Reply to message */}
                     {msg.reply_to && (
                       <div className={`mb-1 p-2 rounded-lg bg-muted/50 border-l-4 border-primary/50 ${
@@ -246,13 +246,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     
                     {/* Message bubble */}
                     <div
-                      className={`relative group p-3 ${
+                      className={`relative group px-3 py-2 ${
                         isOwnMessage(msg)
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted'
                       } rounded-2xl`}
                     >
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      <p className="text-[13px] leading-5 whitespace-pre-wrap">{msg.content}</p>
                       
                       {/* Message time and status - only show on last message of group */}
                       {isLastInGroup && (
