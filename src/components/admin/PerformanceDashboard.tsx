@@ -90,16 +90,16 @@ export const PerformanceDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-bold">Performance Dashboard</h2>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={loadDashboardData}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 h-11 px-4 sm:h-9"
           >
             <RefreshCw className="h-4 w-4" />
             Refresh
@@ -108,6 +108,7 @@ export const PerformanceDashboard = () => {
             variant={autoRefresh ? "default" : "outline"}
             size="sm"
             onClick={() => setAutoRefresh(!autoRefresh)}
+            className="h-11 px-4 sm:h-9"
           >
             Auto-refresh
           </Button>
@@ -123,7 +124,7 @@ export const PerformanceDashboard = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-2xl font-bold">
@@ -229,7 +230,7 @@ export const PerformanceDashboard = () => {
         <CardContent>
           <div className="space-y-3">
             {dashboardData.recentOperations.map((operation, index) => (
-              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+              <div key={index} className="flex items-center justify-between p-4 border rounded-lg touch-manipulation">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{operation.operationName}</span>
@@ -270,7 +271,7 @@ export const PerformanceDashboard = () => {
               <CardContent>
                 <div className="space-y-2">
                   {dashboardData.slowOperations.map((operation, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 border rounded">
+                    <div key={index} className="flex items-center justify-between p-3 sm:p-2 border rounded touch-manipulation">
                       <span className="font-medium">{operation.operationName}</span>
                       <span className="text-red-600 font-medium">
                         {formatDuration(operation.averageDuration)}
@@ -293,7 +294,7 @@ export const PerformanceDashboard = () => {
               <CardContent>
                 <div className="space-y-2">
                   {dashboardData.errorProneOperations.map((operation, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 border rounded">
+                    <div key={index} className="flex items-center justify-between p-3 sm:p-2 border rounded touch-manipulation">
                       <span className="font-medium">{operation.operationName}</span>
                       <span className="text-red-600 font-medium">
                         {operation.successRate.toFixed(1)}% success

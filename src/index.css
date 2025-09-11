@@ -130,6 +130,21 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-8px); }
   }
+
+  /* Improve mobile touch behavior */
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .safe-px {
+    padding-left: max(env(safe-area-inset-left), 1rem);
+    padding-right: max(env(safe-area-inset-right), 1rem);
+  }
+  .safe-pb {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+
+  /* Removed global scaling to avoid side gutters on very small iPhones */
 }
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 

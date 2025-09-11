@@ -89,7 +89,7 @@ const Index = () => {
     <AppLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-0 flex-col sm:flex-row">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               MeetMate
@@ -98,7 +98,7 @@ const Index = () => {
               Manage your schedule and share with others
             </p>
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             <Button 
               variant="outline" 
               onClick={() => { 
@@ -107,7 +107,7 @@ const Index = () => {
                 setHasRealtimeNew(false);
                 navigate('/conversations'); 
               }} 
-              className="relative"
+              className="relative w-full sm:w-auto h-11 sm:h-9 touch-manipulation"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               Conversations
@@ -119,7 +119,7 @@ const Index = () => {
                 </span>
               )}
             </Button>
-            <Button onClick={() => setShareModalOpen(true)}>
+            <Button onClick={() => setShareModalOpen(true)} className="w-full sm:w-auto h-11 sm:h-9 touch-manipulation">
               <Share2 className="h-4 w-4 mr-2" />
               Share
             </Button>

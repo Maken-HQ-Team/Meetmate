@@ -103,13 +103,6 @@ const Conversations = () => {
         
         <div className="flex items-center space-x-2">
           <Button
-            variant="outline"
-            onClick={() => refreshContacts()}
-            className="mr-2"
-          >
-            Refresh
-          </Button>
-          <Button
             onClick={() => setNewChatOpen(true)}
             className="bg-primary hover:bg-primary/90"
           >
@@ -119,23 +112,27 @@ const Conversations = () => {
         </div>
       </div>
 
-      {/* Main Layout - Fixed Height */}
-      <div className="flex-1 flex min-h-0 overflow-hidden">
-        {/* Left Side - Contact List Component */}
-        <ContactList
-          contacts={contacts || []}
-          loading={contactsLoading}
-          searchQuery={searchQuery}
-          selectedContactId={selectedContact?.id}
-          onSearchChange={setSearchQuery}
-          onContactSelect={handleContactClick}
-        />
+      {/* Main Layout - Responsive without JS: single pane on mobile, split on larger */}
+      <div className="h-full flex min-h-0 overflow-hidden">
+        {/* Contact list: hide on mobile when a chat is open; always show on sm+ */}
+        <div className={`flex-1 min-w-0 ${selectedContact ? 'hidden sm:block' : 'block'}`}>
+          <ContactList
+            contacts={contacts || []}
+            loading={contactsLoading}
+            searchQuery={searchQuery}
+            selectedContactId={selectedContact?.id}
+            onSearchChange={setSearchQuery}
+            onContactSelect={handleContactClick}
+          />
+        </div>
 
-        {/* Right Side - Conversation Area Component */}
-        <ConversationArea
-          selectedContact={selectedContact}
-          onBack={() => setSelectedContact(null)}
-        />
+        {/* Conversation: show on mobile only when a contact is selected; always show on sm+ */}
+        <div className={`flex-1 min-w-0 ${selectedContact ? 'flex' : 'hidden sm:flex'}`}>
+          <ConversationArea
+            selectedContact={selectedContact}
+            onBack={() => setSelectedContact(null)}
+          />
+        </div>
       </div>
 
       {/* New Chat Modal */}

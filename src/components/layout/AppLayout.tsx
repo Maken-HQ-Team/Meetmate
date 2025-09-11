@@ -42,7 +42,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
+        <div className="w-full px-3 sm:px-4 sm:container flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
@@ -126,7 +126,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto py-6 px-4">
+      <main className="mx-auto w-full sm:container py-6 px-3 sm:px-4 min-h-[calc(100dvh-4rem)] overflow-y-auto overflow-x-hidden">
         {children}
       </main>
     </div>
