@@ -212,17 +212,17 @@ const ShareManager = () => {
                     : 'bg-gray-50 border-gray-200 dark:bg-gray-900 dark:border-gray-700'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center space-x-3 min-w-0">
                     <Avatar className="w-10 h-10">
                       <AvatarImage src={share.viewer_profile?.avatar_url} alt={share.viewer_profile?.name} />
                       <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20">
                         {(share.viewer_profile?.name || 'U').charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center space-x-2">
-                        <h4 className="font-medium text-sm">
+                        <h4 className="font-medium text-sm truncate">
                           {share.viewer_profile?.name || 'Unknown User'}
                         </h4>
                         {share.viewer_profile?.country && (
@@ -237,7 +237,7 @@ const ShareManager = () => {
                           {share.is_active ? "Active" : "Paused"}
                         </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground truncate">
                         {share.viewer_profile?.email}
                       </p>
                       <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-1">
@@ -252,12 +252,12 @@ const ShareManager = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2 sm:ml-4 w-full sm:w-auto justify-stretch sm:justify-end flex-wrap">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => toggleShareStatus(share.id, share.is_active)}
-                      className="h-8"
+                      className="h-10 sm:h-8 w-full sm:w-auto"
                     >
                       {share.is_active ? (
                         <>
@@ -275,7 +275,7 @@ const ShareManager = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => deleteShare(share.id)}
-                      className="h-8 text-destructive hover:text-destructive"
+                      className="h-10 sm:h-8 text-destructive hover:text-destructive w-full sm:w-auto"
                     >
                       <Trash2 className="h-3 w-3" />
                     </Button>

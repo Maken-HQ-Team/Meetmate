@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import Conversations from "./pages/Conversations";
 import Terms from "./pages/Terms";
 import NotFound from "./pages/NotFound";
+import Updates from "./pages/Updates";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,11 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/updates" element={
+                <ProtectedRoute requireAuth={false}>
+                  <Updates />
+                </ProtectedRoute>
+              } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

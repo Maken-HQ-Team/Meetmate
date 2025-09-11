@@ -364,7 +364,7 @@ const Settings = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto p-6 max-w-2xl">
+      <div className="w-full p-4 sm:p-6 max-w-2xl mx-auto">
         <div className="mb-6">
           <div className="flex items-center space-x-4 mb-4">
             <Button
@@ -397,19 +397,19 @@ const Settings = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Avatar Section */}
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-start items-center gap-4">
               <Avatar className="h-20 w-20">
                 <AvatarImage src={profileData.avatar_url} alt={profileData.name} />
                 <AvatarFallback className="bg-gradient-to-br from-primary/20 to-accent/20 text-lg">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <div className="space-y-2">
-                <div className="flex gap-2">
+              <div className="space-y-2 w-full">
+                <div className="flex gap-2 flex-wrap w-full">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-2 w-full sm:w-auto h-11 sm:h-9"
                     disabled={loading}
                     onClick={() => {
                       console.log('🔄 Upload button clicked');
@@ -423,7 +423,7 @@ const Settings = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setShowAvatarPicker(true)}
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-2 w-full sm:w-auto h-11 sm:h-9"
                     disabled={loading}
                   >
                     <Palette className="h-4 w-4" />
@@ -473,7 +473,7 @@ const Settings = () => {
                 <span>Timezone</span>
               </Label>
               <Select value={profileData.timezone_id} onValueChange={handleTimezoneChange}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select your timezone" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
@@ -517,11 +517,11 @@ const Settings = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-between pt-4">
+            <div className="flex flex-col sm:flex-row gap-2 justify-between pt-4">
               <Button
                 variant="outline"
                 onClick={() => navigate('/')}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 w-full sm:w-auto h-11 sm:h-10"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span>Back to Home</span>
@@ -529,7 +529,7 @@ const Settings = () => {
               <Button
                 onClick={handleSave}
                 disabled={loading}
-                className="bg-gradient-primary hover:opacity-90"
+                className="bg-gradient-primary hover:opacity-90 w-full sm:w-auto h-11 sm:h-10"
               >
                 {loading ? (
                   <>
@@ -549,7 +549,7 @@ const Settings = () => {
 
         {/* Avatar Picker Modal */}
         <Dialog open={showAvatarPicker} onOpenChange={setShowAvatarPicker}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="w-[95vw] sm:w-auto max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center space-x-2">
                 <ImageIcon className="h-5 w-5" />
@@ -563,7 +563,7 @@ const Settings = () => {
                   <h3 className="font-medium capitalize text-sm text-muted-foreground">
                     {category}
                   </h3>
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                     {getAvatarsByCategory(category).map((avatar) => (
                       <button
                         key={avatar.id}

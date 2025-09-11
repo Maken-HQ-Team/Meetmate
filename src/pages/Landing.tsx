@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { Helmet } from "react-helmet";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Clock, Users, MessageCircle, Share2, ArrowRight, Sparkles, Twitter, Github, Linkedin, type LucideIcon } from 'lucide-react';
+import { Calendar, Clock, Users, MessageCircle, Share2, ArrowRight, Sparkles, Twitter, Github, Linkedin, Megaphone, type LucideIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { QUOTES } from '@/utils/quotes';
 
 // --- SEO + Scroll Animation Hooks ---
@@ -103,8 +104,22 @@ const FloatingIcon: React.FC<{ Icon: LucideIcon; className?: string }> = ({ Icon
   </div>
 );
 
+interface AppUpdate { id: string; version: string; title: string; content: string; created_at: string; badge_label?: string | null; badge_variant?: 'default' | 'secondary' | 'destructive' | 'outline' | null; }
+
 const Landing = () => {
   const containerRef = useScrollReveal();
+  const [updates, setUpdates] = useState<AppUpdate[]>([]);
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from('app_updates')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+      if (data) setUpdates(data as AppUpdate[]);
+    };
+    load();
+  }, []);
   return (
     <>
       {/* SEO Helmet */}
@@ -138,11 +153,18 @@ const Landing = () => {
                 MeetMate
               </h1>
             </div>
-            <Link to="/auth">
-              <Button variant="outline" className="bg-background/80 backdrop-blur-sm">
-                Sign In
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link to="/updates" className="hidden sm:block">
+                <Button variant="ghost" className="bg-background/60 backdrop-blur-sm h-10">
+                  <Megaphone className="h-4 w-4 mr-2" /> What's New
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button variant="outline" className="bg-background/80 backdrop-blur-sm">
+                  Sign In
+                </Button>
+              </Link>
+            </div>
           </div>
         </header>
 
@@ -170,6 +192,39 @@ const Landing = () => {
                 <p className="text-sm text-muted-foreground">No credit card required • Free forever</p>
               </div>
             </div>
+
+            {/* What's New preview */}
+            {updates.length > 0 && (
+              <section className="reveal translate-y-6 opacity-0 transition-all duration-700">
+                <div className="max-w-3xl mx-auto bg-background/70 backdrop-blur-sm rounded-xl border p-4 sm:p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Megaphone className="h-5 w-5" />
+                      <h3 className="text-lg font-semibold">What's New</h3>
+                    </div>
+                    <Link to="/updates" className="text-sm underline">View all</Link>
+                  </div>
+                  <div className="space-y-3">
+                    {updates.map(u => (
+                      <div key={u.id} className="p-3 rounded-lg border bg-card/60 relative overflow-hidden">
+                        {u.badge_label && (
+                          <div className="update-label update-label--danger">
+                            {u.badge_label}
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium">{u.title}</div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">v{u.version}</span>
+                          </div>
+                        </div>
+                        <div className="text-sm text-muted-foreground mt-1 line-clamp-3 whitespace-pre-wrap">{u.content}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
 
             {/* Instant Global Connection */}
             <section className="pt-20 reveal translate-y-6 opacity-0 transition-all duration-700">

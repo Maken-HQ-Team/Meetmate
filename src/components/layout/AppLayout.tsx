@@ -12,6 +12,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown';
+import { useNavigate as useNav } from 'react-router-dom';
+import { Megaphone } from 'lucide-react';
 import { 
   Calendar, 
   LogOut, 
@@ -26,6 +28,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
+  const nav = useNav();
   
 
   const getInitials = (name: string) => {
@@ -55,6 +58,17 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
           {/* Right Side */}
           <div className="flex items-center space-x-3">
+            {/* Updates shortcut */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9"
+              onClick={() => nav('/updates')}
+              title="Product Updates"
+            >
+              <Megaphone className="h-4 w-4" />
+            </Button>
+
             {/* Notifications */}
             <NotificationsDropdown />
 

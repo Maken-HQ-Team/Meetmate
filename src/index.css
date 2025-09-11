@@ -117,6 +117,37 @@
   .drag-active {
     @apply bg-primary/10 border-primary;
   }
+
+  /* Updates UI components */
+  .update-card {
+    position: relative;
+    overflow: visible;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+  .update-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px -12px hsl(var(--foreground) / 0.15);
+  }
+  .update-label {
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    color: white;
+    font-size: 11px;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    box-shadow: 0 4px 12px -6px rgba(0,0,0,.35);
+    pointer-events: none;
+  }
+  /* Color variants for labels */
+  .update-label--primary { background: hsl(var(--primary)); }
+  .update-label--success { background: hsl(142 76% 36%); }
+  .update-label--warning { background: hsl(45 93% 47%); }
+  .update-label--danger { background: hsl(0 84.2% 60.2%); }
+  .update-label--info { background: hsl(217.2 91.2% 59.8%); }
+  .update-label--purple { background: hsl(261 83% 58%); }
 }
 
 @layer utilities {
